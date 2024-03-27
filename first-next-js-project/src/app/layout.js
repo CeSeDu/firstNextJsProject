@@ -1,16 +1,19 @@
 import { Inter } from "next/font/google";
-
+import 'bootstrap/dist/css/bootstrap.css';
+import BootstrapClient from "@/components/bootstrapClient.js";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "ToDo App"
+  title: "ToDo App",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className='{inter.className} bg-secondary bg-opacity-50 container m-auto p-4 text-light'>{children}
+      <BootstrapClient />
+      </body>
     </html>
   );
 }
