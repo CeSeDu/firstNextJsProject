@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import 'bootstrap/dist/css/bootstrap.css';
-import BootstrapClient from "@/components/bootstrapClient.js";
+import BootstrapClient from "@/components/BootstrapClient.js";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,7 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className='{inter.className} bg-secondary bg-opacity-50 container m-auto p-4 text-light'>{children}
+      <body className='{inter.className} bg-primary bg-opacity-25  container m-auto p-4 text-light'>{children}
       <BootstrapClient />
       </body>
     </html>
