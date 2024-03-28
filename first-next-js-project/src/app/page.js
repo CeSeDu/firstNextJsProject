@@ -1,5 +1,7 @@
 "use client"; // Bileşenin istemci tarafında çalıştığını belirtir
-import React, { useState } from "react"; // React ve useState hook'unu içe aktarır
+import React, { useState, useEffect } from "react"; // React ve useState hook'unu içe aktarır
+import { db } from '../../firebase/firebase.js';
+
 
 export default function TodoList() {
   const [todos, setTodos] = useState([]);
@@ -15,16 +17,37 @@ export default function TodoList() {
       setError("Lütfen tüm alanları doldurun!");
       return;
     }
-
-    setTodos([
-      ...todos,
-      { task: todoInput, status: "InProgress", startDate, endDate },
-    ]);
-    setTodoInput("");
-    setStartDate("");
-    setEndDate("");
-    setError("");
+  
+    // Firebase Firestore'a yeni todo ekleyin
+    db.collection('todos').add({
+      task: todoInput,
+      status: "InProgress",
+      startDate,
+      endDate
+    })
+    .then((docRef) => {
+      // Eklenen todo'nun başarılı bir şekilde eklenip eklenmediğini kontrol etmek için gerekirse işlemleri gerçekleştirin
+      console.log("Todo başarıyla eklendi, eklendiği doküman ID:", docRef.id);
+      
+      // State'leri sıfırlayın
+      setTodoInput("");
+      setStartDate("");
+      setEndDate("");
+      setError("");
+    })
+    .catch((error) => {
+      // Hata durumunda işlemleri gerçekleştirin
+      console.error("Todo eklenirken hata oluştu: ", error);
+    });
   };
+
+  // Component yüklendiğinde Firestore'dan todo'ları alma işlemi
+  // useEffect(() => {
+  //   const unsubscribe = db.collection('todos').onSnapshot(snapshot => {
+  //     setTodos(snapshot.docs.map(doc => doc.data()));
+  //   });
+  //   return () => unsubscribe(); // Cleanup
+  // }, []);
 
   const handleStatusChange = (index, status) => {
     const updatedTodos = todos.map((todo, i) => {
@@ -70,15 +93,6 @@ export default function TodoList() {
 
   return (
     <main className="p-0 m-0 gap-2 d-grid ">
-      {/* <nav class="navbar bg-body-tertiary pt-0 mt-0">
-     <div class="container-fluid">
-      <a class="navbar-brand">Navbar</a>
-      <form class="d-flex" role="search">
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" /> 
-      <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-      </div>
-      </nav> */}
       <div className="row gap-2 justify-content-center position-fixed vh-100 container ">
         <div className="bg-primary bg-opacity-50 col-12 col-md-2 overflow-auto p-0 text-center rounded shadow-lg ">
           <form
@@ -187,33 +201,33 @@ export default function TodoList() {
                       </div>
                     )}
                   </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-primary bg-opacity-50 col-12 col-md-4 overflow-auto p-0 text-center rounded shadow-lg">
-          <h3 className="bg-primary">Done</h3>
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">Task</th>
-                <th scope="col">Start Date</th>
-                <th scope="col">End Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {doneTodos.map((todo, index) => (
-                <tr key={index}>
-                  <td>{todo.task}</td>
-                  <td>{todo.startDate}</td>
-                  <td>{todo.endDate}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </main>
-  );
-}
+                  </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="bg-primary bg-opacity-50 col-12 col-md-4 overflow-auto p-0 text-center rounded shadow-lg">
+                <h3 className="bg-primary">Done</h3>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Task</th>
+                      <th scope="col">Start Date</th>
+                      <th scope="col">End Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {doneTodos.map((todo, index) => (
+                      <tr key={index}>
+                        <td>{todo.task}</td>
+                        <td>{todo.startDate}</td>
+                        <td>{todo.endDate}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </main>
+        );
+      }
