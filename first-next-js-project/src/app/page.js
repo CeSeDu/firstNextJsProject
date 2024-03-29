@@ -1,24 +1,26 @@
 "use client"; // Bileşenin istemci tarafında çalıştığını belirtir
 import React, { useState, useEffect } from "react"; // React ve useState hook'unu içe aktarır
-import { db } from '../../firebase/firebase.js';
-
+import { db } from '../../firebase/firebase.js'; // Firebase bağlantısını içe aktarır
 
 export default function TodoList() {
-  const [todos, setTodos] = useState([]);
-  const [doneTodos, setDoneTodos] = useState([]); // "Done" sütununa taşınan görevler için state
-  const [error, setError] = useState("");
-  const [todoInput, setTodoInput] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [editIndex, setEditIndex] = useState(null);
+  // State'lerin tanımlanması
+  const [todos, setTodos] = useState([]); // Todo listesi
+  const [doneTodos, setDoneTodos] = useState([]); // Tamamlanan görevlerin listesi
+  const [error, setError] = useState(""); // Hata durumlarını saklamak için
+  const [todoInput, setTodoInput] = useState(""); // Yeni todo girişi
+  const [startDate, setStartDate] = useState(""); // Yeni todo'nun başlangıç tarihi
+  const [endDate, setEndDate] = useState(""); // Yeni todo'nun bitiş tarihi
+  const [editIndex, setEditIndex] = useState(null); // Düzenleme modunda olduğunuz todo'nun indeksi
 
+  // Yeni todo ekleme fonksiyonu
   const addTodo = () => {
+    // Boş alan kontrolü
     if (!todoInput || !startDate || !endDate) {
       setError("Lütfen tüm alanları doldurun!");
       return;
     }
   
-    // Firebase Firestore'a yeni todo ekleyin
+    // Firebase Firestore'a yeni todo ekleme
     db.collection('todos').add({
       task: todoInput,
       status: "InProgress",
@@ -29,7 +31,7 @@ export default function TodoList() {
       // Eklenen todo'nun başarılı bir şekilde eklenip eklenmediğini kontrol etmek için gerekirse işlemleri gerçekleştirin
       console.log("Todo başarıyla eklendi, eklendiği doküman ID:", docRef.id);
       
-      // State'leri sıfırlayın
+      // State'leri sıfırla
       setTodoInput("");
       setStartDate("");
       setEndDate("");
@@ -41,14 +43,15 @@ export default function TodoList() {
     });
   };
 
-  // Component yüklendiğinde Firestore'dan todo'ları alma işlemi
+  // Firestore'dan todo'ları alma işlemi
   // useEffect(() => {
   //   const unsubscribe = db.collection('todos').onSnapshot(snapshot => {
   //     setTodos(snapshot.docs.map(doc => doc.data()));
   //   });
   //   return () => unsubscribe(); // Cleanup
-  // }, []);
+  //  }, []);
 
+  // Todo'nun durumunu değiştirme işlemi
   const handleStatusChange = (index, status) => {
     const updatedTodos = todos.map((todo, i) => {
       if (i === index) {
@@ -74,16 +77,19 @@ export default function TodoList() {
     }
   };
 
+  // Todo silme işlemi
   const handleDelete = (index) => {
     const updatedTodos = [...todos];
     updatedTodos.splice(index, 1);
     setTodos(updatedTodos);
   };
 
+  // Todo düzenleme işlemi
   const handleEdit = (index) => {
     setEditIndex(index);
   };
 
+  // Düzenlenen todo'yu kaydetme işlemi
   const handleSaveEdit = (index, editedTodo) => {
     const updatedTodos = [...todos];
     updatedTodos[index] = editedTodo;
@@ -91,18 +97,22 @@ export default function TodoList() {
     setEditIndex(null);
   };
 
-  return (
+  // JSX içinde render edilen bileşen
+  return  (
     <main className="p-0 m-0 gap-2 d-grid ">
+      {/* Ana bileşen içeriği */}
       <div className="row gap-2 justify-content-center position-fixed vh-100 container ">
+        {/* Yeni Todo Ekleme Formu */}
         <div className="bg-primary bg-opacity-50 col-12 col-md-2 overflow-auto p-0 text-center rounded shadow-lg ">
           <form
             onSubmit={(e) => {
-              e.preventDefault();
-              addTodo();
+              e.preventDefault(); // Formun varsayılan davranışını engelle
+              addTodo(); // Yeni todo ekleme fonksiyonunu çağır
             }}
           >
             <h3 className="bg-primary pos">Add ToDo</h3>
             <div className="d-grid justify-content-center align-items-center">
+              {/* Yeni todo için input alanları */}
               <input
                 type="text"
                 value={todoInput}
@@ -131,6 +141,8 @@ export default function TodoList() {
             </div>
           </form>
         </div>
+
+        {/* Todo Listesi */}
         <div className="bg-primary bg-opacity-50 col-12 col-md-5 overflow-auto p-0 text-center rounded shadow-lg h-100">
           <h3 className="bg-primary">Todo List</h3>
           <table className="table">
@@ -144,9 +156,11 @@ export default function TodoList() {
               </tr>
             </thead>
             <tbody>
+              {/* Todo listesinin her bir elemanı için */}
               {todos.map((todo, index) => (
                 <tr key={index}>
                   <td>
+                    {/* Düzenleme modunda mı kontrolü */}
                     {editIndex === index ? (
                       <input
                         type="text"
@@ -165,6 +179,7 @@ export default function TodoList() {
                   <td>{todo.startDate}</td>
                   <td>{todo.endDate}</td>
                   <td>
+                    {/* Todo'nun durumunu değiştirme dropdown'ı */}
                     <select
                       value={todo.status}
                       onChange={(e) =>
@@ -177,6 +192,7 @@ export default function TodoList() {
                     </select>
                   </td>
                   <td>
+                    {/* Düzenleme modunda mı kontrolü */}
                     {editIndex === index ? (
                       <button
                         onClick={() => handleSaveEdit(index, todo)}
@@ -186,6 +202,7 @@ export default function TodoList() {
                       </button>
                     ) : (
                       <div>
+                        {/* Düzenleme ve Silme butonları */}
                         <button
                           onClick={() => handleEdit(index)}
                           className="btn btn-warning"
@@ -201,33 +218,36 @@ export default function TodoList() {
                       </div>
                     )}
                   </td>
-                  </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="bg-primary bg-opacity-50 col-12 col-md-4 overflow-auto p-0 text-center rounded shadow-lg">
-                <h3 className="bg-primary">Done</h3>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Task</th>
-                      <th scope="col">Start Date</th>
-                      <th scope="col">End Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {doneTodos.map((todo, index) => (
-                      <tr key={index}>
-                        <td>{todo.task}</td>
-                        <td>{todo.startDate}</td>
-                        <td>{todo.endDate}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </main>
-        );
-      }
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Tamamlanan Todo Listesi */}
+        <div className="bg-primary bg-opacity-50 col-12 col-md-4 overflow-auto p-0 text-center rounded shadow-lg">
+          <h3 className="bg-primary">Done</h3>
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Tamamlanan todo listesi */}
+              {doneTodos.map((todo, index) => (
+                <tr key={index}>
+                  <td>{todo.task}</td>
+                  <td>{todo.startDate}</td>
+                  <td>{todo.endDate}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+ );
+}
