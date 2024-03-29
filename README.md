@@ -18,6 +18,8 @@ Bu basit ToDo uygulaması, kullanıcıların yapılacak görevleri ekleyebilecek
 - useState Hook: Komponent içindeki durumu yönetmek için kullanıldı.
 - JavaScript: Uygulamanın mantığını oluşturmak için kullanıldı.
 
+Proje, Next.js kullanılarak oluşturulduktan sonra Bootstrap kütüphanesi eklenmiş ve gerekli npm paketleri yüklendikten sonra bir sayfa oluşturulmuştur. Bu sayfa içerisinde üç kolon bulunmakta ve temel bir todo uygulaması yer almaktadır. Projeye Firebase eklendiği halde yapılan geliştirmeler sadece front-end tarafında kalmıştır.
+
 ## Kurulum
 
 1. Bu repo'yu klonlayın:
