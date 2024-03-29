@@ -23,7 +23,7 @@ Bu basit ToDo uygulaması, kullanıcıların yapılacak görevleri ekleyebilecek
 1. Bu repo'yu klonlayın:
 
     ```bash
-    git clone https://github.com/kullanici/ToDo-App.git
+    git clone https://github.com/CeSeDu/firstNextJsProject.git
     ```
 
 2. Proje dizinine gidin:
