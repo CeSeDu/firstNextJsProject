@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import 'bootstrap/dist/css/bootstrap.css';
 import BootstrapClient from "@/components/BootstrapClient.js";
 const inter = Inter({ subsets: ["latin"] });
+import './globals.css';
 
 export const metadata = {
   title: "ToDo App",
