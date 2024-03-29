@@ -1,0 +1,4 @@
+.smaller-text {
+    font-size: 13px; /* ya da px, em, rem gibi bir değer */
+    color: red;
+}
