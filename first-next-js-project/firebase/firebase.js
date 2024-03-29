@@ -1,8 +1,6 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-
-
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore/lite'; 
+import admin from '../api/firebase-admn.js';
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,6 +11,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
+// Firebase client-side uygulamasını başlatın
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+const db = getFirestore(app); // Firestore bağlantısını oluşturun ve dışa aktarın
+
+// Firebase Admin SDK yapılandırması
+
+
+export { db }; // Firestore bağlantısını ve Firebase Admin SDK'yı dışa aktarın

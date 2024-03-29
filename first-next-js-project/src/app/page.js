@@ -1,6 +1,7 @@
 "use client"; // Bileşenin istemci tarafında çalıştığını belirtir
-import React, { useState, useEffect } from "react"; // React ve useState hook'unu içe aktarır
-import { db } from '../../firebase/firebase.js'; // Firebase bağlantısını içe aktarır
+import React, { useState, useEffect } from "react";
+import { db } from '../../firebase/firebase.js';
+import { collection, addDoc, onSnapshot } from 'firebase/firestore/lite';
 
 export default function TodoList() {
   // State'lerin tanımlanması
@@ -12,44 +13,59 @@ export default function TodoList() {
   const [endDate, setEndDate] = useState(""); // Yeni todo'nun bitiş tarihi
   const [editIndex, setEditIndex] = useState(null); // Düzenleme modunda olduğunuz todo'nun indeksi
 
+  // Firestore'dan todo'ları alma işlemi
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const todoCollection = db.collection('todos');
+        const snapshot = await getDocs(todoCollection);
+        const todoList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setTodos(todoList);
+      } catch (error) {
+        console.error('Error getting documents: ', error);
+      }
+    };
+
+    fetchTodos();
+  }, []); // Bileşen yüklendiğinde yalnızca bir kez çalışması için boş bağımlılık listesi kullanılır
+
   // Yeni todo ekleme fonksiyonu
-  const addTodo = () => {
-    // Boş alan kontrolü
+ const addTodo = () => {
     if (!todoInput || !startDate || !endDate) {
       setError("Lütfen tüm alanları doldurun!");
       return;
     }
   
-    // Firebase Firestore'a yeni todo ekleme
-    db.collection('todos').add({
+    addDoc(collection(db, 'todos'), {
       task: todoInput,
       status: "InProgress",
       startDate,
       endDate
     })
     .then((docRef) => {
-      // Eklenen todo'nun başarılı bir şekilde eklenip eklenmediğini kontrol etmek için gerekirse işlemleri gerçekleştirin
       console.log("Todo başarıyla eklendi, eklendiği doküman ID:", docRef.id);
-      
-      // State'leri sıfırla
       setTodoInput("");
       setStartDate("");
       setEndDate("");
       setError("");
     })
     .catch((error) => {
-      // Hata durumunda işlemleri gerçekleştirin
       console.error("Todo eklenirken hata oluştu: ", error);
     });
   };
 
   // Firestore'dan todo'ları alma işlemi
-  // useEffect(() => {
-  //   const unsubscribe = db.collection('todos').onSnapshot(snapshot => {
-  //     setTodos(snapshot.docs.map(doc => doc.data()));
-  //   });
-  //   return () => unsubscribe(); // Cleanup
-  //  }, []);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'todos'), snapshot => {
+      const todoList = snapshot.docs.map(doc => doc.data());
+      setTodos(todoList);
+    }, error => {
+      console.error('Error getting documents: ', error);
+    });
+
+    return unsubscribe;
+  }, []);
+
 
   // Todo'nun durumunu değiştirme işlemi
   const handleStatusChange = (index, status) => {
@@ -98,7 +114,7 @@ export default function TodoList() {
   };
 
   // JSX içinde render edilen bileşen
-  return  (
+  return (
     <main className="p-0 m-0 gap-2 d-grid ">
       {/* Ana bileşen içeriği */}
       <div className="row gap-2 justify-content-center position-fixed vh-100 container ">
@@ -159,23 +175,7 @@ export default function TodoList() {
               {/* Todo listesinin her bir elemanı için */}
               {todos.map((todo, index) => (
                 <tr key={index}>
-                  <td>
-                    {/* Düzenleme modunda mı kontrolü */}
-                    {editIndex === index ? (
-                      <input
-                        type="text"
-                        value={todo.task}
-                        onChange={(e) =>
-                          handleSaveEdit(index, {
-                            ...todo,
-                            task: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      todo.task
-                    )}
-                  </td>
+                  <td>{todo.task}</td>
                   <td>{todo.startDate}</td>
                   <td>{todo.endDate}</td>
                   <td>
@@ -192,31 +192,19 @@ export default function TodoList() {
                     </select>
                   </td>
                   <td>
-                    {/* Düzenleme modunda mı kontrolü */}
-                    {editIndex === index ? (
-                      <button
-                        onClick={() => handleSaveEdit(index, todo)}
-                        className="btn btn-primary"
-                      >
-                        Save
-                      </button>
-                    ) : (
-                      <div>
-                        {/* Düzenleme ve Silme butonları */}
-                        <button
-                          onClick={() => handleEdit(index)}
-                          className="btn btn-warning"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(index)}
-                          className="btn btn-danger"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                    {/* Düzenleme ve Silme butonları */}
+                    <button
+                      onClick={() => handleEdit(index)}
+                      className="btn btn-warning"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(index)}
+                      className="btn btn-danger"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -249,5 +237,5 @@ export default function TodoList() {
         </div>
       </div>
     </main>
- );
+  );
 }
